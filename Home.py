@@ -7,7 +7,7 @@ import os
 
 # ---- [] Gubs, Euros, Corps y Fechas
 
-from modules.generales_0630 import *
+from modules.generales import *
 
 
 # ---- Input Data ------
@@ -46,8 +46,7 @@ st.write("# Calculadora Renta Fija - COAP")
 st.markdown("#")
 
 st.markdown("#### Para continuar, seleccione el procedimiento que desee realizar en el menú del lado izquierdo.")
-        
-        
+
         
             
             

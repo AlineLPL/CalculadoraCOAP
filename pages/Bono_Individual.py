@@ -7,12 +7,12 @@ import os
 
 # ---- [] Gubs, Euros, Corps y Fechas
 
-from modules.generales_0630 import *
+from modules.generales import *
 
-from modules.corpos_0630 import *
-from modules.eurobonos_0629 import *
-from modules.gubernamentales_3006 import *
-from modules.generales_0630 import *
+from modules.corpos import *
+from modules.eurobonos import *
+from modules.gubernamentales import *
+from modules.generales import *
 
 # ---- Helpers ---------
 
@@ -46,6 +46,19 @@ st.markdown("En la siguiente sección se pueden realizar valuaciones de bonos in
             " Es necesario configurar el instrumento a valuar en el menú de la izquierda.")
 
 
+with st.sidebar.form(key = 'yield_data'):
+    
+    select_type_yield = st.radio(label = "Tipo Tasa",
+                         options = ['Fija', 'Variable', 'Cero'],
+                         index = 0,
+                         help = 'La opción tasa cero aplica para los bonos corporativos que son valuados como un CETE.',
+                         horizontal = True)
+    
+    select_type_yield = select_type_yield.lower()
+    
+    submit_button_yield = st.form_submit_button(label="Seleccione Tipo Tasa")
+
+
 with st.sidebar.form(key = 'btn_data'):
     
     st.title("Configuración:")
@@ -56,14 +69,17 @@ with st.sidebar.form(key = 'btn_data'):
     select_coupon_spread = 0
     
     
-    # Tipo Tasa
-    select_type_yield = st.radio(label = "Tipo Tasa",
-                         options = ['Fija', 'Variable', 'Cero'],
-                         index = 0,
-                         help = 'La opción tasa cero aplica para los bonos corporativos que son valuados como un CETE.',
-                         horizontal = True)
     
-    select_type_yield = select_type_yield.lower()
+    
+    # Tipo Tasa
+    # select_type_yield = st.radio(label = "Tipo Tasa",
+    #                      options = ['Fija', 'Variable', 'Cero'],
+    #                      index = 0,
+    #                      help = 'La opción tasa cero aplica para los bonos corporativos que son valuados como un CETE.',
+    #                      horizontal = True)
+    
+    # select_type_yield = select_type_yield.lower()
+    #st.write(select_type_yield)
 
 
     # Fecha Valuación
@@ -123,32 +139,40 @@ with st.sidebar.form(key = 'btn_data'):
     c7, c8 = st.columns(2)
     
     with c7:
-        select_yield = st.text_input(label = "Tasa de Rendimiento: ",
-                                     value = "0.00")
-        select_yield = float(select_yield)
+        select_yield = st.text_input(label = "Tasa Rendimiento: ",
+                                     value = "0.00",
+                                     help = "Tasa en %")
+        
+        select_yield = float(select_yield) / 100
         
     with c8:
         select_coupon_rate = st.text_input(label = "Tasa Cupón: ",
-                                           value = "0.00")
-        select_coupon_rate = float(select_coupon_rate)
+                                           value = "0.00",
+                                           help = "Tasa en %")
+        
+        select_coupon_rate = float(select_coupon_rate) / 100
         
         
     # Si es tasa variable...
-    if select_type_yield == 'Variable':
+    if select_type_yield == 'variable':
         
         
         # Sobretasa Mercado y Sobretasa Cupón
         c9, c10 = st.columns(2)
         
         with c9:
-            select_yield_spread = st.sidebar.text_input(label = "Sobre Tasa:",
-                                                value = "0.00")
-            select_yield_spread = float(select_yield_spread)
+            select_yield_spread = st.text_input(label = "Sobre Tasa:",
+                                                value = "0.00",
+                                                help = "Tasa en %")
+            
+            select_yield_spread = float(select_yield_spread) / 100
             
         with c10:
-            select_coupon_spread = st.sidebar.text_input(label = "Sobre Tasa Cupón:",
-                                                value = "0.00")
-            select_coupon_spread = float(select_coupon_spread)
+            select_coupon_spread = st.text_input(label = "Sobre Tasa Cupón:",
+                                                value = "0.00",
+                                                help = "Tasa en %")
+            
+            select_coupon_spread = float(select_coupon_spread) / 100
             
         market_yield =  select_yield
         rate_yield = 0
@@ -215,61 +239,67 @@ with c11:
     
 if btn_val:
     
-    results = list(
-        map(
-            genera_resultados,
-            df["id_bono"],
-            df["fecha_valuacion"],
-            df["fecha_vencimiento"],
-            df["periodo_cupon"],
-            df["calendario"],
-            df["convencion"],
-            df["tv"],
-            df["vn"],
-            df["tipo_cambio"],
-            df["tasa_cupon"],
-            df["t_rend"],
-            df["tasa_mercado"],
-            df["sobre_tasa"],
-            df["dia_fijo"],
-            df["tipo_tasa"],
-            df["sobre_tasa_cupon"],
-        )
-    )
+    try:
     
-    # Since the results are in a list of lists we need to retreive each component
-    # of the output.
-    
-    lista_val = [output[0] for output in results]
-    lista_flujos = [output[1] for output in results]
-    
-    
-    df_valuacion = pd.DataFrame(
-        lista_val,
-        columns=["id_bono", "px_sucio", "cupon_dev", "px_limpio", "duracion", "convexidad"],
-    )
-    df_flujos = pd.concat(lista_flujos, axis = 0, ignore_index = True)
-    
-    # ---- [] Results
-    
-    with st.expander("Valuación"):
-        st.write(df_valuacion
-                 .drop(columns = ['id_bono'])
-                 .rename(columns = {'px_sucio':'Precio Sucio',
-                                    'cupon_dev':'Interes Devengado',
-                                    'px_limpio':'Precio Limpio',
-                                    'duracion':'Duracion',
-                                    'convexidad':'Convexidad'})
+        results = list(
+            map(
+                genera_resultados,
+                df["id_bono"],
+                df["fecha_valuacion"],
+                df["fecha_vencimiento"],
+                df["periodo_cupon"],
+                df["calendario"],
+                df["convencion"],
+                df["tv"],
+                df["vn"],
+                df["tipo_cambio"],
+                df["tasa_cupon"],
+                df["t_rend"],
+                df["tasa_mercado"],
+                df["sobre_tasa"],
+                df["dia_fijo"],
+                df["tipo_tasa"],
+                df["sobre_tasa_cupon"],
+            )
         )
         
-    with st.expander("Flujos Restantes"):
-        st.write(df_flujos
-                 .drop(columns = ['id_bono', 'plazo_next'])
-                 .rename(columns = {'fecha_cupon':'Fecha Cupon',
-                                    'plazo':'Plazo',
-                                    'dias_cupon':'Dias Cupon',
-                                    'vp_flujo':'VP Flujo'})
-                 )
+        # Since the results are in a list of lists we need to retreive each component
+        # of the output.
+        
+        lista_val = [output[0] for output in results]
+        lista_flujos = [output[1] for output in results]
+        
+        
+        df_valuacion = pd.DataFrame(
+            lista_val,
+            columns=["id_bono", "px_sucio", "cupon_dev", "px_limpio", "duracion", "convexidad"],
+        )
+        df_flujos = pd.concat(lista_flujos, axis = 0, ignore_index = True)
+        
+        # ---- [] Results
+        
+        with st.expander("Valuación"):
+            st.write(df_valuacion
+                     .drop(columns = ['id_bono'])
+                     .rename(columns = {'px_sucio':'Precio Sucio',
+                                        'cupon_dev':'Interes Devengado',
+                                        'px_limpio':'Precio Limpio',
+                                        'duracion':'Duracion',
+                                        'convexidad':'Convexidad'})
+            )
+            
+        with st.expander("Flujos Restantes"):
+            st.write(df_flujos
+                     .drop(columns = ['id_bono', 'plazo_next'])
+                     .rename(columns = {'fecha_cupon':'Fecha Cupon',
+                                        'plazo':'Plazo',
+                                        'dias_cupon':'Dias Cupon',
+                                        'vp_flujo':'VP Flujo'})
+                     )
+            
+    except:
+        
+        st.error("Se configuró de forma erronea el instrumento a valuar. Por favor revise los inputs nuevamente.")
     
 
     

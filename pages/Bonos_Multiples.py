@@ -7,7 +7,7 @@ import os
 
 # ---- [] Gubs, Euros, Corps y Fechas
 
-from modules.generales_0630 import *
+from modules.generales import *
 
 # ---- Input Data ------
 
@@ -28,16 +28,16 @@ def convert_df_to_csv(df):
 
 # ---- Add sidebar to the app ------
 
-st.sidebar.markdown("# Configuración")
-st.sidebar.markdown(
-    "En esta sección se deben de seleccionar las configuraciones iniciales relevantes para la valuación:"
-)
+# st.sidebar.markdown("# Configuración")
+# st.sidebar.markdown(
+#     "En esta sección se deben de seleccionar las configuraciones iniciales relevantes para la valuación:"
+# )
 
 # ---- [] Dates, Filters, Yields
 
-valuation_date = st.sidebar.date_input("Fecha de Valuación")
-yield_bpa = st.sidebar.number_input("Tasa BPAs")
-yield_ld = st.sidebar.number_input("Tasa LDs")
+# valuation_date = st.sidebar.date_input("Fecha de Valuación")
+# yield_bpa = st.sidebar.number_input("Tasa BPAs")
+# yield_ld = st.sidebar.number_input("Tasa LDs")
 
 
 # ----  Main Interface -------
