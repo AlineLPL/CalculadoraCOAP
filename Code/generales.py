@@ -4,10 +4,10 @@ import pandas as pd
 import datetime
 from bizdays import Calendar
 
-from modules.fechas import *
-from modules.gubernamentales_3006 import *
-from modules.eurobonos_0629 import *
-from modules.corpos_0630 import *
+from Code.fechas import *
+from Code.gubernamentales import *
+from Code.eurobonos import *
+from Code.corpos import *
 
 # ---- Calendarios ----
 
@@ -76,7 +76,7 @@ def convexidad_bono(tipo_tasa, v_plazos, v_vp_flujos, px_sucio, t_ref, periodo_c
 
 # ---- Genera Resultados ----
 
-def genera_resultados(id_bono, fecha_valuacion, fecha_vencimiento, periodo_cupon, calendario, convencion, tv, vn, tipo_cambio, tasa_cupon, t_rend, tasa_mercado, sobre_tasa, dia_fijo, tipo_tasa, sobre_tasa_cupon):
+def genera_resultados(id_bono, isin, fecha_valuacion, fecha_vencimiento, periodo_cupon, calendario, convencion, tv, vn, tipo_cambio, tasa_cupon, t_rend, tasa_mercado, sobre_tasa, dia_fijo, tipo_tasa, sobre_tasa_cupon):
     
     date_format = "%d/%m/%Y"
     
@@ -270,8 +270,9 @@ def genera_resultados(id_bono, fecha_valuacion, fecha_vencimiento, periodo_cupon
     
     
     # Salida
-    list_out = [id_bono, px_sucio, int_dev, px_limpio, duration, convexity]
+    list_out = [id_bono, isin, px_sucio, int_dev, px_limpio, duration, convexity]
     df_val.insert(0, 'id_bono', id_bono)
+    
     
     return list_out, df_val
 
