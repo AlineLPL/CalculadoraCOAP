@@ -89,7 +89,7 @@ def genera_resultados(id_bono, isin, fecha_valuacion, fecha_vencimiento, periodo
     euros_cupon_cero = ['D2', 'D2SP', 'D3', 'D3SP', 'D7', 'D7SP', 'D8', 'D8SP']
     
     corpos_completo = ['2','71','73','75','90','91','91SP','92','93','93SP','94','94SP',
-                       '95','97','98','CD','D','D2','D7','D8','F','FSP','G','I','IL',
+                       '95','97','98','CD','D','F','FSP','G','I','IL',
                        'JE','J', 'JI','JSP','Q','QSP','R1']
     
     
