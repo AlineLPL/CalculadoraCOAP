@@ -9,10 +9,6 @@ import os
 
 from modules.generales import *
 
-from modules.corpos import *
-from modules.eurobonos import *
-from modules.gubernamentales import *
-from modules.generales import *
 
 # ---- Helpers ---------
 
@@ -20,14 +16,14 @@ from modules.generales import *
 gubernamentales_cuponados = ['M', 'S','2U','PI', 'IM', 'IQ', 'IS', 'LD', 'LF']
 gubernamentales_cupon_cero = ['BI','MC','MP', 'SC', 'SP']
 
-euros_cuponados = ['D1', 'D1SP', 'D4', 'D4SP', 'D5', 'D5SP', 'D6', 'D6SP']
-euros_cupon_cero = ['D2', 'D2SP', 'D3', 'D3SP', 'D7', 'D7SP', 'D8', 'D8SP']
+euros_completo = ['D1', 'D1SP', 'D4', 'D4SP', 'D5', 'D5SP', 'D6', 'D6SP',
+                  'D2', 'D2SP', 'D3', 'D3SP', 'D7', 'D7SP', 'D8', 'D8SP']
 
 corpos_completo = ['2','71','73','75','90','91','91SP','92','93','93SP','94','94SP',
-                   '95','97','98','CD','D','D2','D7','D8','F','FSP','G','I','IL',
+                   '95','97','98','CD','D','F','FSP','G','I','IL',
                    'JE','J', 'JI','JSP','Q','QSP','R1']
 
-all_tv = gubernamentales_cuponados + gubernamentales_cupon_cero + euros_cuponados + euros_cupon_cero + corpos_completo
+all_tv = gubernamentales_cuponados + gubernamentales_cupon_cero + euros_completo + corpos_completo
 all_tv = list(set(all_tv))
 
 # ---- [] Periodos Cupón
@@ -68,19 +64,6 @@ with st.sidebar.form(key = 'btn_data'):
     select_yield_spread = 0
     select_coupon_spread = 0
     
-    
-    
-    
-    # Tipo Tasa
-    # select_type_yield = st.radio(label = "Tipo Tasa",
-    #                      options = ['Fija', 'Variable', 'Cero'],
-    #                      index = 0,
-    #                      help = 'La opción tasa cero aplica para los bonos corporativos que son valuados como un CETE.',
-    #                      horizontal = True)
-    
-    # select_type_yield = select_type_yield.lower()
-    #st.write(select_type_yield)
-
 
     # Fecha Valuación
     valuation_date = st.date_input("📅 Fecha Valuación:")
@@ -91,8 +74,10 @@ with st.sidebar.form(key = 'btn_data'):
     end_date = st.date_input("📅 Fecha Vencimiento:")
     end_date = str(end_date)
     end_date = end_date.split('-')
-        
-    # TV y Periodo Cupón
+    
+    # === Todos Comparten ===
+    
+    # TV y VN
     c1, c2 = st.columns(2)
     
     with c1:
@@ -102,50 +87,38 @@ with st.sidebar.form(key = 'btn_data'):
                                  help = 'Se encuentran listados todos los tipos valor documentados en los manuales de Valmer para eurobonos,gubernamentales y corporativos')
         
     with c2:
-        cupon_period = st.selectbox(label = "Periodo Cupón: ",
-                                    options = cupon_period_list,
-                                    index = 5)
-        
-    # VN y Día Fijo
-    c3, c4 = st.columns(2)
-    
-    with c3:
         face_value = st.text_input(label = "Nominal: ",
                                    value = "0.00")
         face_value = float(face_value)
         
-        
-    with c4:
-        select_fixed_day = st.selectbox(label = "Cupón en Día Fijo:",
-                                        options = ['Si', 'No'])
-        
-        select_fixed_day = select_fixed_day.lower()
-        
-    # Convención Días y Tipo de Cambio
-    c5, c6 = st.columns(2)
+    # Convencion Días y Tipo de cambio
+    c3, c4 = st.columns(2)
     
-    with c5:
+    with c3:
         select_daycount_convention = st.selectbox(label = "Convención Días: ",
                                                   options = daycount_list,
                                                   index = 2)
         
-    with c6:
+    with c4:
         exchange_rate = st.text_input(label = "Tipo de Cambio",
                                       value = "1.00")
         exchange_rate = float(exchange_rate)
         
     
-    # Tasa Rendimiento y Tasa Cupón    
-    c7, c8 = st.columns(2)
+        
+    # Tasa de rendimiento
     
-    with c7:
-        select_yield = st.text_input(label = "Tasa Rendimiento: ",
-                                     value = "0.00",
-                                     help = "Tasa en %")
+    select_yield = st.text_input(label = "Tasa Rendimiento: ",
+                                 value = "0.00",
+                                 help = "Tasa en %")
+    
+    select_yield = float(select_yield) / 100
+
+    
+    # === Tasa Fija ====
+    
+    if select_type_yield == 'fija':
         
-        select_yield = float(select_yield) / 100
-        
-    with c8:
         select_coupon_rate = st.text_input(label = "Tasa Cupón: ",
                                            value = "0.00",
                                            help = "Tasa en %")
@@ -153,8 +126,50 @@ with st.sidebar.form(key = 'btn_data'):
         select_coupon_rate = float(select_coupon_rate) / 100
         
         
+            
+        c7, c8 = st.columns(2)
+        
+        with c7:
+            cupon_period = st.selectbox(label = "Periodo Cupón: ",
+                                        options = cupon_period_list,
+                                        index = 5)
+        
+        with c8:
+            select_fixed_day = st.selectbox(label = "Cupón en Día Fijo:",
+                                            options = ['Si', 'No'])
+            
+            select_fixed_day = select_fixed_day.lower()
+            
+        market_yield = 0
+        select_coupon_spread = 0
+        rate_yield = select_yield
+                
+    
+        
+        
     # Si es tasa variable...
-    if select_type_yield == 'variable':
+    elif select_type_yield == 'variable':
+        
+        select_coupon_rate = st.text_input(label = "Tasa Cupón: ",
+                                           value = "0.00",
+                                           help = "Tasa en %")
+        
+        select_coupon_rate = float(select_coupon_rate) / 100
+    
+            
+        c7, c8 = st.columns(2)
+        
+        
+        with c7:
+            cupon_period = st.selectbox(label = "Periodo Cupón: ",
+                                        options = cupon_period_list,
+                                        index = 5)
+        
+        with c8:
+            select_fixed_day = st.selectbox(label = "Cupón en Día Fijo:",
+                                            options = ['Si', 'No'])
+            
+            select_fixed_day = select_fixed_day.lower()
         
         
         # Sobretasa Mercado y Sobretasa Cupón
@@ -177,8 +192,16 @@ with st.sidebar.form(key = 'btn_data'):
         market_yield =  select_yield
         rate_yield = 0
         
-    # Si no es tasa variable...
+    # === Cupón Cero ====
     else:
+        
+        select_fixed_day = 'no'
+        select_coupon_rate = 0
+        cupon_period = 0
+        
+        select_yield_spread = 0
+        select_coupon_spread = 0
+        
         market_yield = 0
         select_coupon_spread = 0
         rate_yield = select_yield
@@ -238,7 +261,7 @@ _, c11, _ = st.columns(3)
 
 with c11:
     btn_val = st.button("Realiza Valuación")
-    
+            
     
 if btn_val:
     
@@ -290,6 +313,8 @@ if btn_val:
                                         'px_limpio':'Precio Limpio',
                                         'duracion':'Duracion',
                                         'convexidad':'Convexidad'})
+                      .style
+                      .format("{:.6f}")
             )
             
         with st.expander("Flujos Restantes"):
@@ -298,6 +323,7 @@ if btn_val:
                       .rename(columns = {'fecha_cupon':'Fecha Cupon',
                                         'plazo':'Plazo',
                                         'dias_cupon':'Dias Cupon',
+                                        'factor_descuento':'Factor Descuento',
                                         'vp_flujo':'VP Flujo'})
                       )
             
